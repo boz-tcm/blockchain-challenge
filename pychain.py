@@ -24,7 +24,7 @@
 ################################################################################
 # Imports
 import streamlit as st
-from dataclasses import dataclass
+from dataclasses import dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
 from typing import Any, List
 import datetime as datetime
 import pandas as pd
@@ -45,12 +45,14 @@ import hashlib
 # 5. Add an attribute named `amount` of type `float`.
 # Note that you’ll use this new `Record` class as the data type of your `record` attribute in the next section.
 
-
-# @TODO
-# Create a Record Data Class that consists of the `sender`, `receiver`, and
+# Create and define a Record Data Class that consists of the `sender`, `receiver`, and
 # `amount` attributes
-# YOUR CODE HERE
-
+@dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
+# The dataclass decorator examines the class to find fields (or attributes as referred to here). A field is defined as a class variable that has a type annotation. https://docs.python.org/3/library/dataclasses.html
+class Record:
+    sender:     str 
+    receiver:   str
+    amount:     float
 
 ################################################################################
 # Step 2:
@@ -62,20 +64,18 @@ import hashlib
 # 1. In the `Block` class, rename the `data` attribute to `record`.
 # 2. Set the data type of the `record` attribute to `Record`.
 
-
-@dataclass
+@dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
+# The dataclass decorator examines the class to find fields. A field is defined as a class variable that has a type annotation. https://docs.python.org/3/library/dataclasses.html
 class Block:
-
-    # @TODO
     # Rename the `data` attribute to `record`, and set the data type to `Record`
-    data: Any
-
+    # data: Any     # Removing 'data' attribute
+    record:     Record  # and replacing with 'record' attribute, or object, instance of 'Record' data type
     creator_id: int
-    prev_hash: str = "0"
-    timestamp: str = datetime.datetime.utcnow().strftime("%H:%M:%S")
-    nonce: int = 0
+    prev_hash:  str = "0" # Declaring attribute and data type, along with initial default value
+    timestamp:  str = datetime.datetime.utcnow().strftime("%H:%M:%S") # Declaring attribute and data type, along with initial default value
+    nonce:      int = 0
 
-    def hash_block(self):
+    def hash_block(self): # Hashing class block function. For hashing block data; implemented using 256-bit hashing function, for purposes of data integrity and validation
         sha = hashlib.sha256()
 
         record = str(self.record).encode()
@@ -95,20 +95,17 @@ class Block:
 
         return sha.hexdigest()
 
-
 @dataclass
-class PyChain:
+class PyChain: # The block chain class.
     chain: List[Block]
     difficulty: int = 4
 
     def proof_of_work(self, block):
-
         calculated_hash = block.hash_block()
 
         num_of_zeros = "0" * self.difficulty
 
         while not calculated_hash.startswith(num_of_zeros):
-
             block.nonce += 1
 
             calculated_hash = block.hash_block()
@@ -132,6 +129,7 @@ class PyChain:
 
         print("Blockchain is Valid")
         return True
+
 
 ################################################################################
 # Streamlit Code
@@ -188,11 +186,7 @@ if st.button("Add Block"):
     # Update `new_block` so that `Block` consists of an attribute named `record`
     # which is set equal to a `Record` that contains the `sender`, `receiver`,
     # and `amount` values
-    new_block = Block(
-        data=input_data,
-        creator_id=42,
-        prev_hash=prev_block_hash
-    )
+    new_block = Block(data=input_data, creator_id=42, prev_hash=prev_block_hash)
 
     pychain.add_block(new_block)
     st.balloons()
