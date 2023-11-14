@@ -67,13 +67,15 @@ class Record:
 @dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
 # The dataclass decorator examines the class to find fields. A field is defined as a class variable that has a type annotation. https://docs.python.org/3/library/dataclasses.html
 class Block:
+    # Declaring attributes and data type, along with initial values in select cases
     # Rename the `data` attribute to `record`, and set the data type to `Record`
     # data: Any     # Removing 'data' attribute
     record:     Record  # and replacing with 'record' attribute, or object, instance of 'Record' data type
     creator_id: int
     prev_hash:  str = "0" # Declaring attribute and data type, along with initial default value
     timestamp:  str = datetime.datetime.utcnow().strftime("%H:%M:%S") # Declaring attribute and data type, along with initial default value
-    nonce:      int = 0
+    nonce:      int = 0 # Nonce: Portmanteau 'Number used only once", employed in proof of work (PoW), and introduced for additional security, including preventing replay attacks, and validation purposes.
+                        # To validate a block, we (miners) need to find the secret key, referred to as the nonce.  The nonce is a number that when added to the block will make the hash start with the number of 0 sets in difficulty.  https://dev.to/icesofty/understanding-the-concept-of-the-nonce-sha3-256-in-a-blockchain-with-nodejs-205h
 
     def hash_block(self): # Hashing class block function. For hashing block data; implemented using 256-bit hashing function, for purposes of data integrity and validation
         sha = hashlib.sha256()
@@ -96,16 +98,16 @@ class Block:
         return sha.hexdigest()
 
 @dataclass
-class PyChain: # The block chain class.
+class PyChain: # Creating and defining the blockchain class.
     chain: List[Block]
-    difficulty: int = 4
+    difficulty: int = 4 # Validation difficulty: number of leading hash zeroes to validate
 
     def proof_of_work(self, block):
-        calculated_hash = block.hash_block()
+        calculated_hash = block.hash_block() # SHA as hexdigest, or in hexadecimal representation
 
         num_of_zeros = "0" * self.difficulty
 
-        while not calculated_hash.startswith(num_of_zeros):
+        while not calculated_hash.startswith(num_of_zeros): # Incrementing the nonce while hash leading zeroes requirement not satisfied
             block.nonce += 1
 
             calculated_hash = block.hash_block()
@@ -118,24 +120,22 @@ class PyChain: # The block chain class.
         self.chain += [block]
 
     def is_valid(self):
-        block_hash = self.chain[0].hash_block()
+        block_hash = self.chain[0].hash_block() # Initialize block_hash prior to entering chain validation loop on individual blocks
 
         for block in self.chain[1:]:
             if block_hash != block.prev_hash:
-                print("Blockchain is invalid!")
-                return False
+                print("Blockchain is invalid!") # If individual block does not validate, function prints invalid
+                return False # Function then returns false state and exits loop and function
+            
+            block_hash = block.hash_block() # If block validated, updates block_hash prior to re-looping
 
-            block_hash = block.hash_block()
-
-        print("Blockchain is Valid")
-        return True
-
+        print("Blockchain is Valid")  # If entire chain validates on each block, prints valid
+        return True # Then returns true state and exits function
 
 ################################################################################
 # Streamlit Code
 
 # Adds the cache decorator for Streamlit
-
 
 @st.cache(allow_output_mutation=True)
 def setup():
