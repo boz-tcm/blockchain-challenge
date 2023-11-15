@@ -24,7 +24,9 @@
 ################################################################################
 # Imports
 import streamlit as st
-from dataclasses import dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
+from dataclasses import (
+    dataclass,
+)  # A decorator that is used for automatically adding generated special methods to user-defined classes
 from typing import Any, List
 import datetime as datetime
 import pandas as pd
@@ -45,14 +47,16 @@ import hashlib
 # 5. Add an attribute named `amount` of type `float`.
 # Note that you’ll use this new `Record` class as the data type of your `record` attribute in the next section.
 
+
 # Create and define a Record Data Class that consists of the `sender`, `receiver`, and
 # `amount` attributes
-@dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
+@dataclass  # A decorator that is used for automatically adding generated special methods to user-defined classes
 # The dataclass decorator examines the class to find fields (or attributes as referred to here). A field is defined as a class variable that has a type annotation. https://docs.python.org/3/library/dataclasses.html
 class Record:
-    sender:     str 
-    receiver:   str
-    amount:     float
+    sender: str
+    receiver: str
+    amount: float
+
 
 ################################################################################
 # Step 2:
@@ -64,20 +68,27 @@ class Record:
 # 1. In the `Block` class, rename the `data` attribute to `record`.
 # 2. Set the data type of the `record` attribute to `Record`.
 
-@dataclass # A decorator that is used for automatically adding generated special methods to user-defined classes
+
+@dataclass  # A decorator that is used for automatically adding generated special methods to user-defined classes
 # The dataclass decorator examines the class to find fields. A field is defined as a class variable that has a type annotation. https://docs.python.org/3/library/dataclasses.html
 class Block:
     # Declaring attributes and data type, along with initial values in select cases
     # Rename the `data` attribute to `record`, and set the data type to `Record`
     # data: Any     # Removing 'data' attribute
-    record:     Record  # and replacing with 'record' attribute, or object, instance of 'Record' data type
+    record: Record  # and replacing with 'record' attribute, or object, instance of 'Record' data type
     creator_id: int
-    prev_hash:  str = "0" # Declaring attribute and data type, along with initial default value
-    timestamp:  str = datetime.datetime.utcnow().strftime("%H:%M:%S") # Declaring attribute and data type, along with initial default value
-    nonce:      int = 0 # Nonce: Portmanteau 'Number used only once", employed in proof of work (PoW), and introduced for additional security, including preventing replay attacks, and validation purposes.
-                        # To validate a block, we (miners) need to find the secret key, referred to as the nonce.  The nonce is a number that when added to the block will make the hash start with the number of 0 sets in difficulty.  https://dev.to/icesofty/understanding-the-concept-of-the-nonce-sha3-256-in-a-blockchain-with-nodejs-205h
+    prev_hash: str = (
+        "0"  # Declaring attribute and data type, along with initial default value)
+    )
+    timestamp: str = datetime.datetime.utcnow().strftime(
+        "%H:%M:%S"
+    )  # Declaring attribute and data type, along with initial default value
+    nonce: int = 0  # Nonce: Portmanteau 'Number used only once", employed in proof of work (PoW), and introduced for additional security, including preventing replay attacks, and validation purposes.
+    # To validate a block, we (miners) need to find the secret key, referred to as the nonce.  The nonce is a number that when added to the block will make the hash start with the number of 0 sets in difficulty.  https://dev.to/icesofty/understanding-the-concept-of-the-nonce-sha3-256-in-a-blockchain-with-nodejs-205h
 
-    def hash_block(self): # Hashing class block function. For hashing block data; implemented using 256-bit hashing function, for purposes of data integrity and validation
+    def hash_block(
+        self,
+    ):  # Hashing class block function. For hashing block data; implemented using 256-bit hashing function, for purposes of data integrity and validation
         sha = hashlib.sha256()
 
         record = str(self.record).encode()
@@ -97,19 +108,25 @@ class Block:
 
         return sha.hexdigest()
 
+
 @dataclass
-class PyChain: # Creating and defining the blockchain class.
+class PyChain:  # Creating and defining the blockchain class.
     chain: List[Block]
-    difficulty: int = 4 # Validation difficulty: number of leading hash zeroes to validate
+    difficulty: int = (
+        4  # Validation difficulty: number of leading hash zeroes to validate
+    )
 
     def proof_of_work(self, block):
-        calculated_hash = block.hash_block() # SHA as hexdigest, or in hexadecimal representation
+        calculated_hash = (
+            block.hash_block()
+        )  # SHA as hexdigest, or in hexadecimal representation
 
         num_of_zeros = "0" * self.difficulty
 
-        while not calculated_hash.startswith(num_of_zeros): # Incrementing the nonce while hash leading zeroes requirement not satisfied
+        while not calculated_hash.startswith(
+            num_of_zeros
+        ):  # Incrementing the nonce while hash leading zeroes requirement not satisfied
             block.nonce += 1
-
             calculated_hash = block.hash_block()
 
         print("Wining Hash", calculated_hash)
@@ -120,27 +137,42 @@ class PyChain: # Creating and defining the blockchain class.
         self.chain += [block]
 
     def is_valid(self):
-        block_hash = self.chain[0].hash_block() # Initialize block_hash prior to entering chain validation loop on individual blocks
+        block_hash = self.chain[
+            0
+        ].hash_block()  # Initialize block_hash prior to entering chain validation loop on individual blocks
 
         for block in self.chain[1:]:
             if block_hash != block.prev_hash:
-                print("Blockchain is invalid!") # If individual block does not validate, function prints invalid
-                return False # Function then returns false state and exits loop and function
-            
-            block_hash = block.hash_block() # If block validated, updates block_hash prior to re-looping
+                print(
+                    "Blockchain is invalid!"
+                )  # If individual block does not validate, function prints invalid
+                return False  # Function then returns false state and exits loop and function
 
-        print("Blockchain is Valid")  # If entire chain validates on each block, prints valid
-        return True # Then returns true state and exits function
+            block_hash = (
+                block.hash_block()
+            )  # If block validated, updates block_hash prior to re-looping
+
+        print(
+            "Blockchain is Valid"
+        )  # If entire chain validates on each block, prints valid
+        return True  # Then returns true state and exits function
+
 
 ################################################################################
 # Streamlit Code
 
 # Adds the cache decorator for Streamlit
 
-@st.cache(allow_output_mutation=True)
+
+@st.cache(
+    allow_output_mutation=True
+)  # Function decorator to memorize function executions. https://docs.streamlit.io/library/api-reference/performance/st.cache
+# st.cache is deprecated. Please use one of Streamlit's new caching commands, st.cache_data or st.cache_resource. (Note: we don't believe these new caching methods support classes nor perhaps preventing hashed returns at this time)
+# The main limitation is that Streamlit’s cache feature doesn’t know about changes that take place outside the body of the annotated function.
+# st.cache implicitly uses the pickle module, which is known to be insecure.
 def setup():
     print("Initializing Chain")
-    return PyChain([Block("Genesis", 0)])
+    return PyChain([Block(record="Genesis", creator_id=0)])
 
 
 st.markdown("# PyChain")
@@ -162,31 +194,33 @@ pychain = setup()
 # 4. Add an input area where you can get a value for `amount` from the user.
 # 5. As part of the Add Block button functionality, update `new_block` so that `Block` consists of an attribute named `record`, which is set equal to a `Record` that contains the `sender`, `receiver`, and `amount` values. The updated `Block`should also include the attributes for `creator_id` and `prev_hash`.
 
-# @TODO:
 # Delete the `input_data` variable from the Streamlit interface.
-input_data = st.text_input("Block Data")
+# input_data = st.text_input("Block Data")
 
-# @TODO:
+# Collect the record data for the block:
 # Add an input area where you can get a value for `sender` from the user.
-# YOUR CODE HERE
-
-# @TODO:
+_sender = st.text_input("Please enter the sender's first and last name")
 # Add an input area where you can get a value for `receiver` from the user.
-# YOUR CODE HERE
-
-# @TODO:
+_receiver = st.text_input("Please enter the receiver's first and last name")
 # Add an input area where you can get a value for `amount` from the user.
-# YOUR CODE HERE
+_amount = st.text_input(
+    f"Please enter the USD amount {_sender} wishes to transmit to {_receiver}"
+)
 
 if st.button("Add Block"):
     prev_block = pychain.chain[-1]
     prev_block_hash = prev_block.hash_block()
 
-    # @TODO
     # Update `new_block` so that `Block` consists of an attribute named `record`
     # which is set equal to a `Record` that contains the `sender`, `receiver`,
     # and `amount` values
-    new_block = Block(data=input_data, creator_id=42, prev_hash=prev_block_hash)
+    input_record = Record(sender=_sender, receiver=_receiver, amount=_amount)
+    # input_record = Record()
+    # input_record.sender = sender
+    # input_record.receiver = receiver
+    # input_record.amount = amount
+
+    new_block = Block(record=input_record, creator_id=42, prev_hash=prev_block_hash)
 
     pychain.add_block(new_block)
     st.balloons()
